@@ -28,7 +28,7 @@
       }
 
       function initWebGL(canvas) {
-        gl = null;
+        var gl = null;
 
         try {
           gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
@@ -47,4 +47,3 @@
     </script>
   </body>
 <html>
-
