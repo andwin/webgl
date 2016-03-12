@@ -15,11 +15,9 @@
     <script src="webgl-utils.js"></script>
 
     <script>
-      var gl;
-
       function start() {
         var glCanvas = document.getElementById('gl-canvas');
-        gl = initWebGL(glCanvas);
+        var gl = initWebGL(glCanvas);
         if (!gl) return;
 
         gl.clearColor(0.18, 0.25, 0.45, 1.0);
