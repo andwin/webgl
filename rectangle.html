@@ -7,6 +7,9 @@
 
       function main() {
         var glCanvas = document.getElementById('gl-canvas');
+        glCanvas.width = window.innerWidth;
+        glCanvas.height = window.innerHeight;
+
         var gl = initWebGL(glCanvas);
         if (!gl) return;
 
@@ -59,10 +62,6 @@
     <style>
       body {
         margin: 0;
-      }
-      #gl-canvas {
-        width: 100%;
-        height: 100%;
       }
     </style>
   </head>
