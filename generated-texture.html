@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <script src="webgl-utils.js"></script>
+
+    <script>
+      window.onload = main;
+
+      var gl;
+
+      var positionLocation;
+      var matrixLocation;
+
+      var virtualScreenWidth = 320;
+      var virtualScreenHeight = 240;
+
+      function main() {
+        var glCanvas = document.getElementById('gl-canvas');
+        glCanvas.width = window.innerWidth;
+        glCanvas.height = window.innerHeight;
+
+        gl = initWebGL(glCanvas);
+        if (!gl) return;
+
+        gl.clearColor(0.18, 0.25, 0.45, 1.0);
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LEQUAL);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // setup GLSL (OpenGL Shading Language) program
+        var program = createProgramFromScripts(gl, '2d-vertex-shader', '2d-fragment-shader');
+        gl.useProgram(program);
+        // look up where the vertex data needs to go.
+        positionLocation = gl.getAttribLocation(program, 'a_position');
+
+        // look up uniform locations
+        // var u_imageLoc = gl.getUniformLocation(program, "u_image");
+        matrixLocation = gl.getUniformLocation(program, 'u_matrix');
+
+        // generate the texture data
+        var data = generateTextureData(virtualScreenWidth, virtualScreenHeight);
+        // load and draw the image
+        draw(data, virtualScreenWidth, virtualScreenHeight, 120, 300, 120, 75);
+      }
+
+      var generateTextureData = function(width, height) {
+        var data = [];
+
+        for(var x = 0; x < width; x++) {
+          for(var y = 0; y < height; y++) {
+            var red = randomValue(256);
+            var green = randomValue(256);
+            var blue = randomValue(256);
+
+            data.push(red);
+            data.push(green);
+            data.push(blue);
+          }
+        }
+
+        return data;
+      }
+
+      var randomValue = function(max) {
+        return Math.floor(Math.random() * max) + 1;
+      }
+
+      var draw = function(texutreData, textureWidth, textureHeight, destX, destY, destWidth, destHeight) {
+        // provide texture coordinates for the rectangle.
+        var positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+          0.0,  0.0,
+          1.0,  0.0,
+          0.0,  1.0,
+          0.0,  1.0,
+          1.0,  0.0,
+          1.0,  1.0]), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        setTextureFromPixelArray(texutreData, gl.RGB, textureWidth, textureHeight);
+
+        // Set the parameters so we can render any size image.
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        // convert dst pixel coords to clipspace coords
+        var clipX = destX / gl.canvas.width * 2 - 1;
+        var clipY = destY / gl.canvas.height * -2 + 1;
+        var clipWidth = destWidth  / gl.canvas.width  *  2;
+        var clipHeight = destHeight / gl.canvas.height * -2;
+
+        // build a matrix that will stretch our
+        // unit quad to our desired size and location
+        gl.uniformMatrix3fv(matrixLocation, false, [
+          clipWidth, 0, 0,
+          0, clipHeight, 0,
+          clipX, clipY, 1,
+        ]);
+
+        // Draw the rectangle.
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      }
+
+      var setTextureFromPixelArray = function(dataArray, type, width, height) {
+        var dataTypedArray = new Uint8Array(dataArray);
+        var texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, type, width, height, 0, type, gl.UNSIGNED_BYTE, dataTypedArray);
+      }
+
+    </script>
+
+    <!-- vertex shader -->
+    <script id="2d-vertex-shader" type="x-shader/x-vertex">
+      attribute vec2 a_position;
+
+      uniform vec2 u_resolution;
+      uniform mat3 u_matrix;
+
+      varying vec2 v_texCoord;
+
+      void main() {
+        gl_Position = vec4(u_matrix * vec3(a_position, 1), 1);
+        v_texCoord = a_position;
+      }
+    </script>
+
+    <!-- fragment shader -->
+    <script id="2d-fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      // our texture
+      uniform sampler2D u_image;
+
+      // the texCoords passed in from the vertex shader.
+      varying vec2 v_texCoord;
+
+      void main() {
+        gl_FragColor = texture2D(u_image, v_texCoord);
+      }
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+
+  </head>
+  <body>
+    <canvas id="gl-canvas"></canvas>
+  </body>
+<html>
