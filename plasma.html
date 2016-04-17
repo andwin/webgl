@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <script src="webgl-utils.js"></script>
+
+    <script>
+      window.onload = main;
+
+      var gl;
+
+      var positionLocation;
+      var matrixLocation;
+
+      var virtualScreenWidth = 320;
+      var virtualScreenHeight = 240;
+
+      var screenWidth = window.innerWidth
+      var screenHeight = window.innerHeight
+
+      var virtualPixelWidth = screenWidth / virtualScreenWidth;
+      var virtualPixelHeight = screenHeight / virtualScreenHeight;
+
+      var time = 0;
+
+      function main() {
+        var glCanvas = document.getElementById('gl-canvas');
+        glCanvas.width = screenWidth;
+        glCanvas.height = screenHeight;
+
+        gl = initWebGL(glCanvas);
+        if (!gl) return;
+
+        // setup GLSL (OpenGL Shading Language) program
+        var program = createProgramFromScripts(gl, '2d-vertex-shader', '2d-fragment-shader');
+        gl.useProgram(program);
+
+        // look up where the vertex data needs to go.
+        positionLocation = gl.getAttribLocation(program, 'a_position');
+
+        // look up uniform locations
+        matrixLocation = gl.getUniformLocation(program, 'u_matrix');
+
+        animateOneFrame();
+        window.setInterval(animateOneFrame, 200);
+      }
+
+      var animateOneFrame = function() {
+        var textureData = [];
+        for(var y = 0; y < virtualScreenHeight; y++) {
+          for(var x = 0; x < virtualScreenWidth; x++) {
+
+            var v1 = Math.sin(x / (virtualPixelWidth * 7) + time) / 2;
+            var v2 = Math.sin((x * Math.sin(time / 5) / (virtualPixelWidth * 5) + y * Math.cos(time / 7) / (virtualPixelHeight * 7)) + time + 100) / 2;
+
+            var cx = x - Math.sin(time / 9) * virtualScreenWidth / 2 * 0.8 - virtualScreenWidth / 2;
+            var cy = y - Math.sin(time / 6) * virtualScreenHeight / 2 * 0.8 - virtualScreenHeight / 2;
+            var v3 = Math.sin(Math.sqrt((cx * cx + cy * cy) / virtualPixelWidth / 180) + time / 2) / 2.3;
+
+            var v = (v1 + v2 + v3) / 3;
+
+            var red = Math.sin(v * Math.PI);
+            var green = Math.cos(v * Math.PI);
+            var blue = 0;
+
+            textureData.push(Math.floor(red * 255) + 1);
+            textureData.push(Math.floor(green * 255) + 1);
+            textureData.push(Math.floor(blue * 255) + 1);
+          }
+        }
+
+        drawTexture(textureData, virtualScreenWidth, virtualScreenHeight, 0, 0, screenWidth, screenHeight);
+
+        time += 0.15;
+      }
+
+      var randomValue = function(max) {
+        return Math.floor(Math.random() * max) + 1;
+      }
+
+    </script>
+
+    <!-- vertex shader -->
+    <script id="2d-vertex-shader" type="x-shader/x-vertex">
+      attribute vec2 a_position;
+
+      uniform vec2 u_resolution;
+      uniform mat3 u_matrix;
+
+      varying vec2 v_texCoord;
+
+      void main() {
+        gl_Position = vec4(u_matrix * vec3(a_position, 1), 1);
+        v_texCoord = a_position;
+      }
+    </script>
+
+    <!-- fragment shader -->
+    <script id="2d-fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      // our texture
+      uniform sampler2D u_image;
+
+      // the texCoords passed in from the vertex shader.
+      varying vec2 v_texCoord;
+
+      void main() {
+        gl_FragColor = texture2D(u_image, v_texCoord);
+      }
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+
+  </head>
+  <body>
+    <canvas id="gl-canvas"></canvas>
+  </body>
+<html>
