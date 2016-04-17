@@ -39,7 +39,7 @@
         // generate the texture data
         var data = generateTextureData(virtualScreenWidth, virtualScreenHeight);
         // load and draw the image
-        draw(data, virtualScreenWidth, virtualScreenHeight, 120, 300, 120, 75);
+        drawTexture(data, virtualScreenWidth, virtualScreenHeight, 120, 300, 120, 75);
       }
 
       var generateTextureData = function(width, height) {
@@ -64,7 +64,7 @@
         return Math.floor(Math.random() * max) + 1;
       }
 
-      var draw = function(texutreData, textureWidth, textureHeight, destX, destY, destWidth, destHeight) {
+      var drawTexture = function(texutreData, textureWidth, textureHeight, destX, destY, destWidth, destHeight) {
         // provide texture coordinates for the rectangle.
         var positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
