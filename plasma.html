@@ -58,12 +58,16 @@
             var v = (v1 + v2 + v3) / 3;
 
             var red = Math.sin(v * Math.PI) * 0.5 + 0.5;
+            red = Math.floor(red * 255) + 1;
+
             var green = Math.cos(v * Math.PI);
+            green = Math.floor(green * 255) + 1;
+
             var blue = 0;
 
-            textureData.push(Math.floor(red * 255) + 1);
-            textureData.push(Math.floor(green * 255) + 1);
-            textureData.push(Math.floor(blue * 255) + 1);
+            textureData.push(red);
+            textureData.push(green);
+            textureData.push(blue);
           }
         }
 
