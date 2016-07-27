@@ -40,7 +40,7 @@
         matrixLocation = gl.getUniformLocation(program, 'u_matrix');
 
         animateOneFrame();
-        window.setInterval(animateOneFrame, 200);
+        window.setInterval(animateOneFrame, 50);
       }
 
       var animateOneFrame = function() {
@@ -73,7 +73,7 @@
 
         drawTexture(textureData, virtualScreenWidth, virtualScreenHeight, 0, 0, screenWidth, screenHeight);
 
-        time += 0.15;
+        time += 0.05;
       }
 
       var randomValue = function(max) {
