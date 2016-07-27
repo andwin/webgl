@@ -20,6 +20,8 @@
       var virtualPixelHeight = screenHeight / virtualScreenHeight;
 
       var time = 0;
+      var palette = [];
+      var colors = 256;
 
       function main() {
         var glCanvas = document.getElementById('gl-canvas');
@@ -39,9 +41,27 @@
         // look up uniform locations
         matrixLocation = gl.getUniformLocation(program, 'u_matrix');
 
+
+        // white -> red
+        palette = generatePalette(239, 235, 230, 219, 43, 57, colors);
+
         animateOneFrame();
         window.setInterval(animateOneFrame, 50);
       }
+
+      var generatePalette = function(R1, G1, B1, R2, G2, B2, colors) {
+        var palette = [];
+
+        for (var c = 0; c < colors; c++) {
+          var r = Math.round(R1 + (R2 - R1) / colors * c)
+          var g = Math.round(G1 + (G2 - G1) / colors * c)
+          var b = Math.round(B1 + (B2 - B1) / colors * c)
+
+          palette.push([r, g, b]);
+        }
+
+        return palette;
+      };
 
       var animateOneFrame = function() {
         var textureData = [];
@@ -56,18 +76,11 @@
             var v3 = Math.sin(Math.sqrt((cx * cx + cy * cy) / virtualPixelWidth / 180) + time / 2) / 2.3;
 
             var v = (v1 + v2 + v3) / 3;
+            v = Math.round((v + 0.5) * colors);
 
-            var red = Math.sin(v * Math.PI) * 0.5 + 0.5;
-            red = Math.floor(red * 255) + 1;
-
-            var green = Math.cos(v * Math.PI);
-            green = Math.floor(green * 255) + 1;
-
-            var blue = 0;
-
-            textureData.push(red);
-            textureData.push(green);
-            textureData.push(blue);
+            textureData.push(palette[v][0]);
+            textureData.push(palette[v][1]);
+            textureData.push(palette[v][2]);
           }
         }
 
