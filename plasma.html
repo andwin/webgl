@@ -78,6 +78,9 @@
             var v = (v1 + v2 + v3) / 3;
             v = Math.round((v + 0.5) * colors);
 
+            if (v > colors -1) v = colors -1;
+            if (v < 0) v = 0;
+
             textureData.push(palette[v][0]);
             textureData.push(palette[v][1]);
             textureData.push(palette[v][2]);
