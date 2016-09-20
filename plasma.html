@@ -72,8 +72,8 @@
 
             var v2 = Math.sin((x * Math.sin(time / 5) / (virtualScreenWidth / 5) + y * Math.cos(time / 4) / (virtualScreenHeight / 20)) + time) / 7.9;
 
-            var cx = x - Math.sin(time / 5) * virtualScreenWidth / 2 * 0.8 - virtualScreenWidth / 2;
-            var cy = y - Math.sin(time / 3) * virtualScreenHeight / 2 * 0.8 - virtualScreenHeight / 2;
+            var cx = x - Math.sin(time / 5) * virtualScreenWidth / 1.6 - virtualScreenWidth / 2;
+            var cy = y - Math.sin(time / 3) * virtualScreenHeight / 1.6 - virtualScreenHeight / 2;
             var v3 = Math.sin(Math.sqrt((cx * cx + cy * cy) / virtualScreenWidth / 18) + time) / 2.3;
 
             var v = (v1 + v2 + v3) / 3;
